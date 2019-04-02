@@ -19,8 +19,15 @@ typedef NS_ENUM(NSUInteger, CHScanType) {
     CHScanTypeCommon,
 };
 
-typedef void(^CHScanViewScanResultBlock)(CHScanConfig *scanConfig, NSArray <NSString *> *stringValues);
-typedef void(^CHScanViewScanImageResultBlock)(NSArray <NSString *> *stringValues);
+@protocol CHScanConfigDelegate <NSObject>
+
+@optional
+- (void)scanConfig:(CHScanConfig *)scanConfig scanResult:(NSArray <NSString *> *)stringValues;
+
+@end
+
+typedef void(^CHScanConfigScanResultBlock)(CHScanConfig *scanConfig, NSArray <NSString *> *stringValues);
+typedef void(^CHScanConfigScanImageResultBlock)(NSArray <NSString *> *stringValues);
 
 @interface CHScanConfig : NSObject
 
@@ -56,10 +63,12 @@ typedef void(^CHScanViewScanImageResultBlock)(NSArray <NSString *> *stringValues
  */
 @property (nonatomic ,assign) CHScanType scanType;
 
+@property (nonatomic ,weak) id <CHScanConfigDelegate> delegate;
+
 /**
  扫码回调
  */
-@property (nonatomic ,copy) CHScanViewScanResultBlock scanResultBlock;
+@property (nonatomic ,copy) CHScanConfigScanResultBlock scanResultBlock;
 
 /**
  开始扫码
@@ -144,7 +153,7 @@ typedef void(^CHScanViewScanImageResultBlock)(NSArray <NSString *> *stringValues
 - (void)setVideoZoomFactorIdentity;
 
 #pragma mark 识别本地图片
-+ (void)recognizeImage:(UIImage *)image resultBlock:(CHScanViewScanImageResultBlock)resultBlock;
++ (void)recognizeImage:(UIImage *)image resultBlock:(CHScanConfigScanImageResultBlock)resultBlock;
 
 #pragma mark 生成二维码
 + (UIImage *)creatQRCodeImageWithString:(NSString *)QRCodeString imageSize:(CGSize)imageSize;

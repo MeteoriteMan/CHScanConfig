@@ -137,6 +137,9 @@
         if (self.scanResultBlock) {
             self.scanResultBlock(self, arrayM.copy);
         }
+        if (self.delegate && [self.delegate respondsToSelector:@selector(scanConfig:scanResult:)]) {
+            [self.delegate scanConfig:self scanResult:arrayM.copy];
+        }
     }
 }
 
@@ -200,7 +203,7 @@
     [self setVideoZoomFactor:1.0];
 }
 
-+ (void)recognizeImage:(UIImage *)image resultBlock:(CHScanViewScanImageResultBlock)resultBlock {
++ (void)recognizeImage:(UIImage *)image resultBlock:(CHScanConfigScanImageResultBlock)resultBlock {
     CIDetector*detector = [CIDetector detectorOfType:CIDetectorTypeQRCode context:nil options:@{ CIDetectorAccuracy : CIDetectorAccuracyHigh }];
     NSArray *features = [detector featuresInImage:[CIImage imageWithCGImage:image.CGImage]];
     NSMutableArray *arrayM = [[NSMutableArray alloc] init];
