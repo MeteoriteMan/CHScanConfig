@@ -135,6 +135,11 @@
     }
 }
 
+- (void)setMetadataObjectTypes:(NSArray<AVMetadataObjectType> *)metadataObjectTypes {
+    _metadataObjectTypes = metadataObjectTypes;
+    self.output.metadataObjectTypes = metadataObjectTypes;
+}
+
 - (void)startRunning {
     if (self.session.isRunning) {
         [self.session stopRunning];
@@ -259,7 +264,7 @@
     // 2. 恢复滤镜的默认属性
     [filter setDefaults];
     // 3. 将字符串转换成NSData
-    NSData *data = [codeString dataUsingEncoding:NSASCIIStringEncoding];
+    NSData *data = [codeString dataUsingEncoding:NSUTF8StringEncoding];
     // 4.1 通过KVO设置滤镜inputMessage数据
     [filter setValue:data forKey:@"inputMessage"];
     // 4.2  消除边界 (二维码/条形码可以设置.PDF417、aztec崩溃)

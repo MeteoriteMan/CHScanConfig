@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <AVFoundation/AVFoundation.h>
 
 @class CHScanConfig;
 
@@ -61,9 +62,12 @@ typedef void(^CHScanConfigScanImageResultBlock)(NSArray <NSString *> *stringValu
 - (instancetype)initWithScanView:(UIView *)scanView rectOfInterest:(CGRect)rectOfInterest;
 
 /**
- 扫码类型.二维码/条形码/通用.默认二维码
+ 扫码类型.二维码/条形码/QRCode/通用.默认QRCode
  */
 @property (nonatomic ,assign) CHScanType scanType;
+
+/// 单独设置扫码类型
+@property (nonatomic ,strong) NSArray <AVMetadataObjectType> *metadataObjectTypes;
 
 @property (nonatomic ,weak) id <CHScanConfigDelegate> delegate;
 
@@ -154,19 +158,19 @@ typedef void(^CHScanConfigScanImageResultBlock)(NSArray <NSString *> *stringValu
  */
 - (void)setVideoZoomFactorIdentity;
 
-#pragma mark 识别本地图片
+#pragma mark 识别本地图片(QRCode)
 + (void)recognizeImage:(UIImage *)image resultBlock:(CHScanConfigScanImageResultBlock)resultBlock;
 
-#pragma mark 生成二维码
+#pragma mark 生成QRCode(可以是中文或者是emoji)
 + (UIImage *)creatQRCodeImageWithString:(NSString *)QRCodeString imageSize:(CGSize)imageSize;
 
-#pragma mark 生成条形码
+#pragma mark 生成条形码(要识别的话只能是数字.字母)
 + (UIImage *)creatCode128BarCodeImageWithString:(NSString *)code128BarCodeString imageSize:(CGSize)imageSize;
 
-#pragma mark 生成PDF417码
+#pragma mark 生成PDF417码(要识别的话只能是数字.字母,空格会自动去掉)
 + (UIImage *)creatPDF417BarCodeImageWithString:(NSString *)PDF417BarCodeString imageSize:(CGSize)imageSize;
 
-#pragma mark 生成aztec码
+#pragma mark 生成aztec码(要识别的话只能是数字.字母,符号会去掉,空格保留)
 + (UIImage *)creatAztecCodeImageWithString:(NSString *)aztecCodeString imageSize:(CGSize)imageSize;
 
 @end

@@ -7,16 +7,15 @@
 //
 
 #import "ViewController.h"
-#import <Masonry.h>
-#import "CHScanConfigHeader.h"
+#import "QRCodeScanViewController.h"
+#import "CreatCodeImageViewController.h"
+#import "CheckQRCodeViewController.h"
 
-@interface ViewController ()
+@interface ViewController () <UITableViewDataSource ,UITableViewDelegate>
 
-@property (nonatomic ,strong) UIView *viewInterest;
+@property (nonatomic ,strong) UITableView *tableView;
 
-@property (nonatomic ,strong) CHScanConfig *scanConfig;
-
-@property (nonatomic ,strong) UIImageView *imageView;
+@property (nonatomic ,strong) NSArray <NSString *> *titleArray;
 
 @end
 
@@ -26,59 +25,95 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
 
-    self.viewInterest = [UIView new];
-    self.viewInterest.backgroundColor = [UIColor colorWithRed:.25 green:.25 blue:.25 alpha:.75];
-    self.viewInterest.hidden = YES;
-    [self.view addSubview:self.viewInterest];
-    [self.viewInterest mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerX.equalTo(self.view);
-        make.top.equalTo(self.mas_topLayoutGuide).offset(12);
-        make.height.width.offset(200);
+    self.tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
+    self.tableView.dataSource = self;
+    self.tableView.delegate = self;
+    [self.view addSubview:self.tableView];
+    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.offset(0);
+        make.top.equalTo(self.mas_topLayoutGuide);
+        make.bottom.equalTo(self.mas_bottomLayoutGuide);
     }];
-    [self.viewInterest layoutIfNeeded];
 
-    [CHScanConfig canOpenScan:^(BOOL canOpen) {
-        if (canOpen) {
-//            self.viewInterest.hidden = NO;
-            self.scanConfig = [[CHScanConfig alloc] initWithScanView:self.view];
-//            [[CHScanConfig alloc] initWithScanView:self.view rectOfInterest:self.viewInterest.frame];
-            self.scanConfig.scanType = CHScanTypeBarCode;
-            self.scanConfig.scanResultBlock = ^(CHScanConfig *scanConfig, NSArray<NSString *> *stringValues) {
-                NSLog(@"%@", stringValues);
-            };
-            [self.scanConfig startRunning];
-        } else {
-//            self.viewInterest.hidden = YES;
+    self.titleArray = @[@"扫描QRCode" ,@"扫描条码" ,@"扫描二维码" ,@"扫描二维码与条码" ,@"生成QRCode" ,@"生成条形码" ,@"生成PDF417" ,@"生成aztec" ,@"检测图片中的二维码"];
+
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.titleArray.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *reuseIdentifier = @"cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
+    if (!cell) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+    }
+    cell.textLabel.text = self.titleArray[indexPath.row];
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    switch (indexPath.row) {
+        case 0:{//扫描QRCode
+            QRCodeScanViewController *vc = [[QRCodeScanViewController alloc] init];
+            vc.scanType = CHScanTypeQRCode;
+            [self.navigationController pushViewController:vc animated:YES];
         }
-    }];
-
-    /// 生成码
-//    self.imageView = [[UIImageView alloc] init];
-//    [self.view addSubview:self.imageView];
-//    [self.imageView mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.center.equalTo(self.view);
-//        make.width.offset(440);
-////        make.height.width.offset(200);
-//        make.height.offset(200);
-//    }];
-//    [self.imageView layoutIfNeeded];
-////    0300054757708
-//    /// 条形码
-//    self.imageView.image = [CHScanConfig creatCode128BarCodeImageWithString:@"12345678" imageSize:self.imageView.bounds.size];
-//    /// 二维码
-////    self.imageView.image = [CHScanConfig creatQRCodeImageWithString:@"12345678" imageSize:self.imageView.bounds.size];
-////    /// PDF417码
-////    self.imageView.image = [CHScanConfig creatPDF417BarCodeImageWithString:@"12345678" imageSize:self.imageView.bounds.size];
-////    /// aztec
-////    self.imageView.image = [CHScanConfig creatAztecCodeImageWithString:@"12345678" imageSize:self.imageView.bounds.size];
-
+            break;
+        case 1:{//扫描条码
+            QRCodeScanViewController *vc = [[QRCodeScanViewController alloc] init];
+            vc.scanType = CHScanTypeBarCode;
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 2:{//扫描二维码
+            QRCodeScanViewController *vc = [[QRCodeScanViewController alloc] init];
+            vc.scanType = CHScanType2DCode;
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 3:{//扫描二维码与条码
+            QRCodeScanViewController *vc = [[QRCodeScanViewController alloc] init];
+            vc.scanType = CHScanTypeCommon;
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 4:{//生成QRCode
+            CreatCodeImageViewController *vc = [[CreatCodeImageViewController alloc] init];
+            vc.codeType = 0;
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 5:{//生成条形码
+            CreatCodeImageViewController *vc = [[CreatCodeImageViewController alloc] init];
+            vc.codeType = 1;
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 6:{//生成PDF417
+            CreatCodeImageViewController *vc = [[CreatCodeImageViewController alloc] init];
+            vc.codeType = 2;
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 7:{//生成aztec
+            CreatCodeImageViewController *vc = [[CreatCodeImageViewController alloc] init];
+            vc.codeType = 3;
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 8:{//检测图片中的二维码
+            CheckQRCodeViewController *vc = [[CheckQRCodeViewController alloc] init];
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+        default:
+            break;
+    }
 }
-
-- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-//    if ([self.scanConfig canTorch]) {
-//        [self.scanConfig setTorch:!self.scanConfig.isTorch];
-//    }
-}
-
 
 @end
