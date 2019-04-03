@@ -11,10 +11,12 @@
 @class CHScanConfig;
 
 typedef NS_ENUM(NSUInteger, CHScanType) {
-    /// 二维码
+    /// QR码
     CHScanTypeQRCode,
     /// 条形码
     CHScanTypeBarCode,
+    /// 二维码
+    CHScanType2DCode,
     /// 二维码/条形码
     CHScanTypeCommon,
 };
@@ -159,6 +161,12 @@ typedef void(^CHScanConfigScanImageResultBlock)(NSArray <NSString *> *stringValu
 + (UIImage *)creatQRCodeImageWithString:(NSString *)QRCodeString imageSize:(CGSize)imageSize;
 
 #pragma mark 生成条形码
-+ (UIImage *)creatBarCodeImageWithString:(NSString *)barCodeString imageSize:(CGSize)imageSize;
++ (UIImage *)creatCode128BarCodeImageWithString:(NSString *)code128BarCodeString imageSize:(CGSize)imageSize;
+
+#pragma mark 生成PDF417码
++ (UIImage *)creatPDF417BarCodeImageWithString:(NSString *)PDF417BarCodeString imageSize:(CGSize)imageSize;
+
+#pragma mark 生成aztec码
++ (UIImage *)creatAztecCodeImageWithString:(NSString *)aztecCodeString imageSize:(CGSize)imageSize;
 
 @end

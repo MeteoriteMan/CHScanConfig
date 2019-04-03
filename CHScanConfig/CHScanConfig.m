@@ -81,32 +81,53 @@
     _scanType = scanType;
     switch (scanType) {
         case CHScanTypeQRCode: {
-            self.output.metadataObjectTypes = @[AVMetadataObjectTypeQRCode];
+            self.output.metadataObjectTypes = @[/// QRCode
+                                                AVMetadataObjectTypeQRCode,
+                                                ];
 
         }
             break;
         case CHScanTypeBarCode: {
-            self.output.metadataObjectTypes = @[AVMetadataObjectTypeEAN13Code,
-                                              AVMetadataObjectTypeEAN8Code,
-                                              AVMetadataObjectTypeUPCECode,
-                                              AVMetadataObjectTypeCode39Code,
-                                              AVMetadataObjectTypeCode39Mod43Code,
-                                              AVMetadataObjectTypeCode93Code,
-                                              AVMetadataObjectTypeCode128Code,
-                                              AVMetadataObjectTypePDF417Code];
+            self.output.metadataObjectTypes = @[/// 条形码
+                                                AVMetadataObjectTypeUPCECode,
+                                                AVMetadataObjectTypeCode39Code,
+                                                AVMetadataObjectTypeCode39Mod43Code,
+                                                AVMetadataObjectTypeEAN13Code,
+                                                AVMetadataObjectTypeEAN8Code,
+                                                AVMetadataObjectTypeCode93Code,
+                                                AVMetadataObjectTypeCode128Code,
+                                                AVMetadataObjectTypeInterleaved2of5Code,
+                                                AVMetadataObjectTypeITF14Code,
+                                                ];
 
         }
             break;
+        case CHScanType2DCode: {
+            self.output.metadataObjectTypes = @[/// 二维码
+                                                AVMetadataObjectTypePDF417Code,
+                                                AVMetadataObjectTypeQRCode,
+                                                AVMetadataObjectTypeAztecCode,
+                                                AVMetadataObjectTypeDataMatrixCode,
+                                                ];
+        }
+            break;
         case CHScanTypeCommon: {
-            self.output.metadataObjectTypes = @[AVMetadataObjectTypeQRCode,
-                                              AVMetadataObjectTypeEAN13Code,
-                                              AVMetadataObjectTypeEAN8Code,
-                                              AVMetadataObjectTypeUPCECode,
-                                              AVMetadataObjectTypeCode39Code,
-                                              AVMetadataObjectTypeCode39Mod43Code,
-                                              AVMetadataObjectTypeCode93Code,
-                                              AVMetadataObjectTypeCode128Code,
-                                              AVMetadataObjectTypePDF417Code];
+            self.output.metadataObjectTypes = @[/// 条形码
+                                                AVMetadataObjectTypeUPCECode,
+                                                AVMetadataObjectTypeCode39Code,
+                                                AVMetadataObjectTypeCode39Mod43Code,
+                                                AVMetadataObjectTypeEAN13Code,
+                                                AVMetadataObjectTypeEAN8Code,
+                                                AVMetadataObjectTypeCode93Code,
+                                                AVMetadataObjectTypeCode128Code,
+                                                AVMetadataObjectTypeInterleaved2of5Code,
+                                                AVMetadataObjectTypeITF14Code,
+                                                /// 二维码
+                                                AVMetadataObjectTypePDF417Code,
+                                                AVMetadataObjectTypeQRCode,
+                                                AVMetadataObjectTypeAztecCode,
+                                                AVMetadataObjectTypeDataMatrixCode,
+                                              ];
         }
             break;
         default:
@@ -215,25 +236,48 @@
     }
 }
 
+/// MARK: Code绘制
 + (UIImage *)creatQRCodeImageWithString:(NSString *)QRCodeString imageSize:(CGSize)imageSize {
+    return [self creatCodeImageFilterName:@"CIQRCodeGenerator" codeString:QRCodeString imageSize:imageSize];
+}
+
++ (UIImage *)creatCode128BarCodeImageWithString:(NSString *)code128BarCodeString imageSize:(CGSize)imageSize {
+    return [self creatCodeImageFilterName:@"CICode128BarcodeGenerator" codeString:code128BarCodeString imageSize:imageSize];
+}
+
++ (UIImage *)creatPDF417BarCodeImageWithString:(NSString *)PDF417BarCodeString imageSize:(CGSize)imageSize {
+    return [self creatCodeImageFilterName:@"CIPDF417BarcodeGenerator" codeString:PDF417BarCodeString imageSize:imageSize];
+}
+
++ (UIImage *)creatAztecCodeImageWithString:(NSString *)aztecCodeString imageSize:(CGSize)imageSize {
+    return [self creatCodeImageFilterName:@"CIAztecCodeGenerator" codeString:aztecCodeString imageSize:imageSize];
+}
+
++ (UIImage *)creatCodeImageFilterName:(NSString *)filterName codeString:(NSString *)codeString imageSize:(CGSize)imageSize {
     // 1. 实例化二维码滤镜
-    CIFilter *filter = [CIFilter filterWithName:@"CIQRCodeGenerator"];
+    CIFilter *filter = [CIFilter filterWithName:filterName];
     // 2. 恢复滤镜的默认属性
     [filter setDefaults];
     // 3. 将字符串转换成NSData
-    NSData *data = [QRCodeString dataUsingEncoding:NSUTF8StringEncoding];
-    // 4. 通过KVO设置滤镜inputMessage数据
+    NSData *data = [codeString dataUsingEncoding:NSASCIIStringEncoding];
+    // 4.1 通过KVO设置滤镜inputMessage数据
     [filter setValue:data forKey:@"inputMessage"];
+    // 4.2  消除边界 (二维码/条形码可以设置.PDF417、aztec崩溃)
+    @try {
+        [filter setValue:[NSNumber numberWithInteger:0] forKey:@"inputQuietSpace"];
+    } @catch (NSException *exception) {
+    } @finally {
+    }
     // 5. 获得滤镜输出的图像
-    CIImage *outputImage = [filter outputImage];
+    CIImage *outputImage = filter.outputImage;
     // 6. 将CIImage转换成UIImage，并放大显示
     CGFloat size = CGFLOAT_MIN;
-    if (UIScreen.mainScreen.bounds.size.height >= UIScreen.mainScreen.bounds.size.width) {
-        size = UIScreen.mainScreen.bounds.size.height;
+    if (imageSize.height >= imageSize.width) {
+        size = imageSize.height;
     } else {
-        size = UIScreen.mainScreen.bounds.size.width;
+        size = imageSize.width;
     }
-    return [self createNonInterpolatedUIImageFormCIImage:outputImage withSize:size];//重绘二维码,使其显示清晰
+    return [self createNonInterpolatedUIImageFormCIImage:outputImage withSize:size];
 }
 
 /**
@@ -260,18 +304,6 @@
     CGContextRelease(bitmapRef);
     CGImageRelease(bitmapImage);
     return [UIImage imageWithCGImage:scaledImage];
-}
-
-+ (UIImage *)creatBarCodeImageWithString:(NSString *)barCodeString imageSize:(CGSize)imageSize {
-    NSData *data = [barCodeString dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:false];
-    CIFilter *filter = [CIFilter filterWithName:@"CICode128BarcodeGenerator"];
-    [filter setValue:data forKey:@"inputMessage"];
-    CIImage *barcodeImage = [filter outputImage];
-    // 消除模糊
-    CGFloat scaleX = imageSize.width / barcodeImage.extent.size.width; // extent 返回图片的frame
-    CGFloat scaleY = imageSize.height / barcodeImage.extent.size.height;
-    CIImage *transformedImage = [barcodeImage imageByApplyingTransform:CGAffineTransformScale(CGAffineTransformIdentity, scaleX, scaleY)];
-    return [UIImage imageWithCIImage:transformedImage];
 }
 
 @end
