@@ -17,6 +17,17 @@
 
 @property (nonatomic ,strong) UIImageView *imageView;
 
+@property (nonatomic ,strong) UIButton *buttonZoomFactorZero;
+
+@property (nonatomic ,strong) UIButton *buttonZoomFactorUpper;
+
+@property (nonatomic ,strong) UIButton *buttonZoomFactorDowner;
+
+@property (nonatomic ,strong) UIButton *buttonTorch;
+
+@property (nonatomic ,strong) UIButton *buttonTorchLighter;
+
+@property (nonatomic ,strong) UIButton *buttonTorchDarker;
 @end
 
 @implementation QRCodeScanViewController
@@ -58,6 +69,90 @@
             //            self.viewInterest.hidden = YES;
         }
     }];
+
+    self.buttonTorch = [UIButton new];
+    [self.view addSubview:self.buttonTorch];
+    [self.buttonTorch setImage:[UIImage imageNamed:@"手电筒 关"] forState:UIControlStateNormal];
+    [self.buttonTorch setImage:[UIImage imageNamed:@"手电筒 开"] forState:UIControlStateSelected];
+    [self.buttonTorch mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.offset(-24);
+        make.bottom.equalTo(self.mas_bottomLayoutGuide).offset(-24);
+    }];
+
+    self.buttonTorchDarker = [UIButton new];
+    [self.view addSubview:self.buttonTorchDarker];
+    [self.buttonTorchDarker setImage:[UIImage imageNamed:@"减"] forState:UIControlStateNormal];
+    [self.buttonTorchDarker mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.buttonTorch);
+        make.bottom.equalTo(self.buttonTorch.mas_top).offset(-24);
+    }];
+
+    self.buttonTorchLighter = [UIButton new];
+    [self.view addSubview:self.buttonTorchLighter];
+    [self.buttonTorchLighter setImage:[UIImage imageNamed:@"加"] forState:UIControlStateNormal];
+    [self.buttonTorchLighter mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.buttonTorchDarker);
+        make.bottom.equalTo(self.buttonTorchDarker.mas_top).offset(-24);
+    }];
+
+
+    self.buttonZoomFactorZero = [UIButton new];
+    [self.view addSubview:self.buttonZoomFactorZero];
+    [self.buttonZoomFactorZero setImage:[UIImage imageNamed:@"刷新"] forState:UIControlStateNormal];
+    [self.buttonZoomFactorZero mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.offset(24);
+        make.bottom.equalTo(self.mas_bottomLayoutGuide).offset(-24);
+    }];
+
+    self.buttonZoomFactorDowner = [UIButton new];
+    [self.view addSubview:self.buttonZoomFactorDowner];
+    [self.buttonZoomFactorDowner setImage:[UIImage imageNamed:@"减"] forState:UIControlStateNormal];
+    [self.buttonZoomFactorDowner mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.buttonZoomFactorZero);
+        make.bottom.equalTo(self.buttonZoomFactorZero.mas_top).offset(-24);
+    }];
+
+    self.buttonZoomFactorUpper = [UIButton new];
+    [self.view addSubview:self.buttonZoomFactorUpper];
+    [self.buttonZoomFactorUpper setImage:[UIImage imageNamed:@"加"] forState:UIControlStateNormal];
+    [self.buttonZoomFactorUpper mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.buttonZoomFactorDowner);
+        make.bottom.equalTo(self.buttonZoomFactorDowner.mas_top).offset(-24);
+    }];
+
+    [self.buttonTorch addTarget:self action:@selector(buttonTorchClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.buttonTorchDarker addTarget:self action:@selector(buttonTorchDarkerClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.buttonTorchLighter addTarget:self action:@selector(buttonTorchLighterClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.buttonZoomFactorZero addTarget:self action:@selector(buttonZoomFactorZeroClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.buttonZoomFactorDowner addTarget:self action:@selector(buttonZoomFactorDownerClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.buttonZoomFactorUpper addTarget:self action:@selector(buttonZoomFactorUpperClick:) forControlEvents:UIControlEventTouchUpInside];
+
+}
+
+- (void)buttonTorchClick:(UIButton *)sender {
+    [self.scanConfig setTorch:!self.scanConfig.isTorch];
+    sender.selected = self.scanConfig.isTorch;
+}
+
+- (void)buttonTorchDarkerClick:(UIButton *)sender {
+    self.scanConfig.torch = self.scanConfig.torch - .1;
+    self.buttonTorch.selected = self.scanConfig.isTorch;
+}
+
+- (void)buttonTorchLighterClick:(UIButton *)sender {
+    self.scanConfig.torch = self.scanConfig.torch + .1;
+    self.buttonTorch.selected = self.scanConfig.isTorch;
+}
+
+- (void)buttonZoomFactorZeroClick:(UIButton *)sender {
+    [self.scanConfig setVideoZoomFactorIdentity];
+}
+- (void)buttonZoomFactorDownerClick:(UIButton *)sender {
+    [self.scanConfig setVideoZoomFactor:self.scanConfig.videoZoomFactor - .5];
+}
+
+- (void)buttonZoomFactorUpperClick:(UIButton *)sender {
+    [self.scanConfig setVideoZoomFactor:self.scanConfig.videoZoomFactor + .5];
 }
 
 /*

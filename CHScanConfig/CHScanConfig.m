@@ -220,13 +220,23 @@
 }
 
 - (void)setVideoZoomFactor:(float)videoZoomFactor {
-    [self.input.device lockForConfiguration:nil];
-    self.input.device.videoZoomFactor = videoZoomFactor;
-    [self.input.device unlockForConfiguration];
+    if (videoZoomFactor >= 1.0) {
+        [self.input.device lockForConfiguration:nil];
+        self.input.device.videoZoomFactor = videoZoomFactor;
+        [self.input.device unlockForConfiguration];
+    }
 }
 
 - (void)setVideoZoomFactorIdentity {
     [self setVideoZoomFactor:1.0];
+}
+
+- (CGFloat)screenBrightness {
+    return UIScreen.mainScreen.brightness;
+}
+
+- (void)setScreenBrightness:(CGFloat)screenBrightness {
+    UIScreen.mainScreen.brightness = screenBrightness;
 }
 
 + (void)recognizeImage:(UIImage *)image resultBlock:(CHScanConfigScanImageResultBlock)resultBlock {
@@ -267,7 +277,7 @@
     NSData *data = [codeString dataUsingEncoding:NSUTF8StringEncoding];
     // 4.1 通过KVO设置滤镜inputMessage数据
     [filter setValue:data forKey:@"inputMessage"];
-    // 4.2  消除边界 (二维码/条形码可以设置.PDF417、aztec崩溃)
+    // 4.2  消除边界 (条形码可以设置.PDF417、aztec崩溃)
     @try {
         [filter setValue:[NSNumber numberWithInteger:0] forKey:@"inputQuietSpace"];
     } @catch (NSException *exception) {

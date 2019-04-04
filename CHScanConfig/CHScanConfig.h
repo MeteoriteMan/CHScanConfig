@@ -158,6 +158,22 @@ typedef void(^CHScanConfigScanImageResultBlock)(NSArray <NSString *> *stringValu
  */
 - (void)setVideoZoomFactorIdentity;
 
+#pragma mark 屏幕亮度
+
+/**
+ 获取屏幕亮度
+
+ @return 返回屏幕亮度0.0-1.0
+ */
+- (CGFloat)screenBrightness;
+
+/**
+ 设置屏幕亮度
+
+ @param screenBrightness 0.0-1.0
+ */
+- (void)setScreenBrightness:(CGFloat)screenBrightness;
+
 #pragma mark 识别本地图片(QRCode)
 + (void)recognizeImage:(UIImage *)image resultBlock:(CHScanConfigScanImageResultBlock)resultBlock;
 

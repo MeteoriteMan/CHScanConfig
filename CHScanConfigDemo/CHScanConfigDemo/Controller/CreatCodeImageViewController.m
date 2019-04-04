@@ -16,14 +16,11 @@
 
 @property (nonatomic ,strong) UITextField *textField;
 
+@property (nonatomic ,strong) UIButton *buttonSave;
+
 @end
 
 @implementation CreatCodeImageViewController
-
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    self.title = @"Code生成";
-}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -51,6 +48,16 @@
     }];
     [self.textField setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
 
+    self.buttonSave = [[UIButton alloc] init];
+    self.buttonSave.backgroundColor = [UIColor colorWithWhite:.6 alpha:1];
+    self.buttonSave.contentEdgeInsets = UIEdgeInsetsMake(6, 8, 6, 8);
+    [self.buttonSave setTitle:@"保存到相册" forState:UIControlStateNormal];
+    [self.view addSubview:self.buttonSave];
+    [self.buttonSave mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(self.textField.mas_top).offset(-8);
+        make.centerX.equalTo(self.view);
+    }];
+
     /// 生成码
     self.imageView = [[UIImageView alloc] init];
     self.imageView.contentMode = UIViewContentModeCenter;
@@ -59,10 +66,11 @@
         make.centerX.equalTo(self.view);
         make.top.equalTo(self.mas_topLayoutGuide).offset(0);
         make.left.right.offset(0);
-        make.bottom.equalTo(self.textField.mas_top).offset(-8);
+        make.bottom.equalTo(self.buttonSave.mas_top).offset(-8);
     }];
 
     [self.button addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.buttonSave addTarget:self action:@selector(buttonSaveClick:) forControlEvents:UIControlEventTouchUpInside];
 }
 
 - (void)buttonClick:(UIButton *)sender {
@@ -88,6 +96,17 @@
             break;
     }
     [self.textField resignFirstResponder];
+}
+
+- (void)buttonSaveClick:(UIButton *)sender {
+    UIImageWriteToSavedPhotosAlbum(self.imageView.image, self, @selector(image:didFinishSavingWithError:contextInfo:), nil);
+}
+
+- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
+    NSString *title = error?@"保存图片失败":@"保存图片成功";
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:nil preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+    [self presentViewController:alertController animated:YES completion:nil];
 }
 
 /*

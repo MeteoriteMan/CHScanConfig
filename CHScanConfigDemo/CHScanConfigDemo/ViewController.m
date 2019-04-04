@@ -21,11 +21,21 @@
 
 @implementation ViewController
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    self.title = @"Demo";
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-
     self.tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
+    if (@available(iOS 11.0, *)) {
+        self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    } else {
+        // Fallback on earlier versions
+        self.automaticallyAdjustsScrollViewInsets = NO;
+    }
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
     [self.view addSubview:self.tableView];
@@ -58,57 +68,67 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    NSString *titleStr = self.titleArray[indexPath.row];
     switch (indexPath.row) {
         case 0:{//扫描QRCode
             QRCodeScanViewController *vc = [[QRCodeScanViewController alloc] init];
+            vc.title = titleStr;
             vc.scanType = CHScanTypeQRCode;
             [self.navigationController pushViewController:vc animated:YES];
         }
             break;
         case 1:{//扫描条码
             QRCodeScanViewController *vc = [[QRCodeScanViewController alloc] init];
+            vc.title = titleStr;
             vc.scanType = CHScanTypeBarCode;
             [self.navigationController pushViewController:vc animated:YES];
         }
             break;
         case 2:{//扫描二维码
             QRCodeScanViewController *vc = [[QRCodeScanViewController alloc] init];
+            vc.title = titleStr;
             vc.scanType = CHScanType2DCode;
             [self.navigationController pushViewController:vc animated:YES];
         }
             break;
         case 3:{//扫描二维码与条码
             QRCodeScanViewController *vc = [[QRCodeScanViewController alloc] init];
+            vc.title = titleStr;
             vc.scanType = CHScanTypeCommon;
             [self.navigationController pushViewController:vc animated:YES];
         }
             break;
         case 4:{//生成QRCode
             CreatCodeImageViewController *vc = [[CreatCodeImageViewController alloc] init];
+            vc.title = titleStr;
             vc.codeType = 0;
             [self.navigationController pushViewController:vc animated:YES];
         }
             break;
         case 5:{//生成条形码
             CreatCodeImageViewController *vc = [[CreatCodeImageViewController alloc] init];
+            vc.title = titleStr;
             vc.codeType = 1;
             [self.navigationController pushViewController:vc animated:YES];
         }
             break;
         case 6:{//生成PDF417
             CreatCodeImageViewController *vc = [[CreatCodeImageViewController alloc] init];
+            vc.title = titleStr;
             vc.codeType = 2;
             [self.navigationController pushViewController:vc animated:YES];
         }
             break;
         case 7:{//生成aztec
             CreatCodeImageViewController *vc = [[CreatCodeImageViewController alloc] init];
+            vc.title = titleStr;
             vc.codeType = 3;
             [self.navigationController pushViewController:vc animated:YES];
         }
             break;
         case 8:{//检测图片中的二维码
             CheckQRCodeViewController *vc = [[CheckQRCodeViewController alloc] init];
+            vc.title = titleStr;
             [self.navigationController pushViewController:vc animated:YES];
         }
         default:
