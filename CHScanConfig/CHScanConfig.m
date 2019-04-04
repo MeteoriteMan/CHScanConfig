@@ -8,7 +8,6 @@
 
 #import "CHScanConfig.h"
 #import <AVFoundation/AVFoundation.h>
-#import "Masonry.h"
 
 @interface CHScanConfig () <AVCaptureMetadataOutputObjectsDelegate>
 
