@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
     s.name         = "CHScanConfig"
-    s.version      = "0.0.1"
-    s.summary      = "扫描/生成二维码、条形码组件."
+    s.version      = "0.0.2"
+    s.summary      = "扫描/生成/识别二维码、条形码、屏幕亮度调节组件."
     s.homepage     = "https://github.com/MeteoriteMan/CHScanConfig"
     s.license      = "MIT"
     s.license      = { :type => "MIT", :file => "LICENSE" }

@@ -7,7 +7,6 @@
 //
 
 #import "CHScanConfig.h"
-#import <AVFoundation/AVFoundation.h>
 
 @interface CHScanConfig () <AVCaptureMetadataOutputObjectsDelegate>
 
