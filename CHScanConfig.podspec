@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = "CHScanConfig"
-    s.version      = "0.0.2"
+    s.version      = "0.0.3"
     s.summary      = "扫描/生成/识别二维码、条形码、屏幕亮度调节组件."
     s.homepage     = "https://github.com/MeteoriteMan/CHScanConfig"
     s.license      = "MIT"
