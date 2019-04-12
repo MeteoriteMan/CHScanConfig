@@ -20,9 +20,17 @@
 
 @property (nonatomic ,strong) UIView *scanView;
 
+@property (nonatomic ,strong) UIView *interestView;
+
 @end
 
 @implementation CHScanConfig
+
+static NSString *frameKey = @"frame";
+static NSString *boundsKey = @"bounds";
+static NSString *centerKey = @"center";
+static NSString *CHScanViewKey = @"CHScanViewKey";
+static NSString *CHInterestViewKey = @"CHInterestViewKey";
 
 + (void)canOpenScan:(void(^)(BOOL canOpen))completeHandle {
     [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
@@ -41,11 +49,13 @@
 }
 
 - (instancetype)initWithScanView:(UIView *)scanView {
-    return [self initWithScanView:scanView rectOfInterest:CGRectZero];
+    return [self initWithScanView:scanView interestView:nil];
 }
 
-- (instancetype)initWithScanView:(UIView *)scanView rectOfInterest:(CGRect)rectOfInterest {
+- (instancetype)initWithScanView:(UIView *)scanView interestView:(UIView *)interestView {
+    [self removeObservers];
     self.scanView = scanView;
+    self.interestView = interestView;
     //获取摄像设备
     AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
     //创建输入流
@@ -68,11 +78,23 @@
     self.layerOutput = [AVCaptureVideoPreviewLayer layerWithSession:self.session];
     self.layerOutput.frame = scanView.bounds;
     self.layerOutput.videoGravity = AVLayerVideoGravityResizeAspectFill;
+    [self setLayerOutputWithInterfaceOrientation:[UIApplication sharedApplication].statusBarOrientation];
     [scanView.layer insertSublayer:self.layerOutput atIndex:0];
-    if (!CGRectEqualToRect(rectOfInterest, CGRectZero)) {
-        self.output.rectOfInterest = [self.layerOutput metadataOutputRectOfInterestForRect:rectOfInterest];
-    }
+    [self setRectOfInterest];
+    [self addObservers];
     return self;
+}
+
+- (void)setRectOfInterest {
+    if (!CGRectEqualToRect(self.interestView.frame, CGRectZero) && self.interestView) {
+        self.output.rectOfInterest = [self.layerOutput metadataOutputRectOfInterestForRect:self.interestView.frame];
+    } else {
+        self.output.rectOfInterest = CGRectMake(0, 0, 1, 1);
+    }
+}
+
+- (void)setLayerOutputWithInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    self.layerOutput.connection.videoOrientation = [self transfromAVCaptureVideoOrientationFrom:interfaceOrientation];
 }
 
 - (void)setScanType:(CHScanType)scanType {
@@ -317,6 +339,76 @@
     CGContextRelease(bitmapRef);
     CGImageRelease(bitmapImage);
     return [UIImage imageWithCGImage:scaledImage];
+}
+
+// MARK: Notifications
+- (void)applicationDidChangeStatusBarOrientationNotification:(NSNotification *)notification {
+    if ([notification.name isEqualToString:UIApplicationDidChangeStatusBarOrientationNotification]) {
+        [self setLayerOutputWithInterfaceOrientation:[UIApplication sharedApplication].statusBarOrientation];
+    }
+}
+
+// MARK:Observer
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (context == (__bridge void * _Nullable)(CHScanViewKey)) {
+        self.layerOutput.frame = self.scanView.bounds;
+    } else if (context == (__bridge void * _Nullable)(CHInterestViewKey)) {
+        [self setRectOfInterest];
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
+- (void)dealloc {
+    [self removeObservers];
+}
+
+- (void)addObservers {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidChangeStatusBarOrientationNotification:) name:UIApplicationDidChangeStatusBarOrientationNotification object:nil];
+    [self.scanView addObserver:self forKeyPath:frameKey options:NSKeyValueObservingOptionNew context:(__bridge void * _Nullable)(CHScanViewKey)];
+    [self.scanView addObserver:self forKeyPath:boundsKey options:NSKeyValueObservingOptionNew context:(__bridge void * _Nullable)(CHScanViewKey)];
+    [self.scanView addObserver:self forKeyPath:centerKey options:NSKeyValueObservingOptionNew context:(__bridge void * _Nullable)(CHScanViewKey)];
+    [self.interestView addObserver:self forKeyPath:frameKey options:NSKeyValueObservingOptionNew context:(__bridge void * _Nullable)(CHInterestViewKey)];
+    [self.interestView addObserver:self forKeyPath:boundsKey options:NSKeyValueObservingOptionNew context:(__bridge void * _Nullable)(CHInterestViewKey)];
+    [self.interestView addObserver:self forKeyPath:centerKey options:NSKeyValueObservingOptionNew context:(__bridge void * _Nullable)(CHInterestViewKey)];
+}
+
+- (void)removeObservers {
+    @try {
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidChangeStatusBarOrientationNotification object:nil];
+        [self.scanView removeObserver:self forKeyPath:frameKey context:(__bridge void * _Nullable)(CHScanViewKey)];
+        [self.scanView removeObserver:self forKeyPath:boundsKey context:(__bridge void * _Nullable)(CHScanViewKey)];
+        [self.scanView removeObserver:self forKeyPath:centerKey context:(__bridge void * _Nullable)(CHScanViewKey)];
+        [self.interestView removeObserver:self forKeyPath:frameKey context:(__bridge void * _Nullable)(CHInterestViewKey)];
+        [self.interestView removeObserver:self forKeyPath:boundsKey context:(__bridge void * _Nullable)(CHInterestViewKey)];
+        [self.interestView removeObserver:self forKeyPath:centerKey context:(__bridge void * _Nullable)(CHInterestViewKey)];
+    } @catch (NSException *exception) {
+    } @finally {
+    }
+}
+
+// MARK: AVCaptureVideoOrientation转换函数
+- (AVCaptureVideoOrientation)transfromAVCaptureVideoOrientationFrom:(UIInterfaceOrientation)interfaceOrientation {
+    switch (interfaceOrientation) {
+        case UIInterfaceOrientationUnknown:
+            return AVCaptureVideoOrientationPortrait;
+            break;
+        case UIInterfaceOrientationPortrait:
+            return AVCaptureVideoOrientationPortrait;
+            break;
+        case UIInterfaceOrientationPortraitUpsideDown:
+            return AVCaptureVideoOrientationPortraitUpsideDown;
+            break;
+        case UIInterfaceOrientationLandscapeLeft:
+            return AVCaptureVideoOrientationLandscapeLeft;
+            break;
+        case UIInterfaceOrientationLandscapeRight:
+            return AVCaptureVideoOrientationLandscapeRight;
+            break;
+        default:
+            return AVCaptureVideoOrientationPortrait;
+            break;
+    }
 }
 
 @end

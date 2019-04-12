@@ -11,11 +11,9 @@
 
 @interface QRCodeScanViewController ()
 
-@property (nonatomic ,strong) UIView *viewInterest;
+@property (nonatomic ,strong) UIImageView *imageViewInterest;
 
 @property (nonatomic ,strong) CHScanConfig *scanConfig;
-
-@property (nonatomic ,strong) UIImageView *imageView;
 
 @property (nonatomic ,strong) UIButton *buttonZoomFactorZero;
 
@@ -42,21 +40,20 @@
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor whiteColor];
     __weak typeof(self) weakSelf = self;
-    self.viewInterest = [UIView new];
-    self.viewInterest.backgroundColor = [UIColor colorWithRed:.25 green:.25 blue:.25 alpha:.75];
-    self.viewInterest.hidden = YES;
-    [self.view addSubview:self.viewInterest];
-    [self.viewInterest mas_makeConstraints:^(MASConstraintMaker *make) {
+    self.imageViewInterest = [[UIImageView alloc] init];;
+    self.imageViewInterest.image = [UIImage imageNamed:@"扫码框"];
+    self.imageViewInterest.hidden = YES;
+    [self.view addSubview:self.imageViewInterest];
+    [self.imageViewInterest mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerX.equalTo(self.view);
         make.top.equalTo(self.mas_topLayoutGuide).offset(12);
         make.height.width.offset(200);
     }];
-    [self.viewInterest layoutIfNeeded];
+
     [CHScanConfig canOpenScan:^(BOOL canOpen) {
         if (canOpen) {
-            //            self.viewInterest.hidden = NO;
-            self.scanConfig = [[CHScanConfig alloc] initWithScanView:self.view];
-            //            [[CHScanConfig alloc] initWithScanView:self.view rectOfInterest:self.viewInterest.frame];
+            self.imageViewInterest.hidden = NO;
+            self.scanConfig = [[CHScanConfig alloc] initWithScanView:self.view interestView:self.imageViewInterest];
             self.scanConfig.scanType = self.scanType;
             self.scanConfig.scanResultBlock = ^(CHScanConfig *scanConfig, NSArray<NSString *> *stringValues) {
                 NSLog(@"%@", stringValues);
@@ -66,7 +63,7 @@
             };
             [self.scanConfig startRunning];
         } else {
-            //            self.viewInterest.hidden = YES;
+            self.imageViewInterest.hidden = YES;
         }
     }];
 
@@ -153,6 +150,10 @@
 
 - (void)buttonZoomFactorUpperClick:(UIButton *)sender {
     [self.scanConfig setVideoZoomFactor:self.scanConfig.videoZoomFactor + .5];
+}
+
+- (void)dealloc {
+    NSLog(@"dealloc:%s", __FUNCTION__);
 }
 
 /*

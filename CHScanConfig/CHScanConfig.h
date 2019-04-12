@@ -56,10 +56,10 @@ typedef void(^CHScanConfigScanImageResultBlock)(NSArray <NSString *> *stringValu
 /**
  创建扫码View
  @param scanView 扫码View显示的位置
- @param rectOfInterest 识别区域
+ @param interestView 识别View
  @return CHScanConfig
  */
-- (instancetype)initWithScanView:(UIView *)scanView rectOfInterest:(CGRect)rectOfInterest;
+- (instancetype)initWithScanView:(UIView *)scanView interestView:(UIView *)interestView;
 
 /**
  扫码类型.二维码/条形码/QRCode/通用.默认QRCode
