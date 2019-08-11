@@ -33,19 +33,44 @@ static NSString *CHScanViewKey = @"CHScanViewKey";
 static NSString *CHInterestViewKey = @"CHInterestViewKey";
 
 + (void)canOpenScan:(void(^)(BOOL canOpen))completeHandle {
-    [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (granted) {
-                if (completeHandle) {
-                    completeHandle(YES);
-                }
-            } else {
-                if (completeHandle) {
-                    completeHandle(NO);
-                }
+    switch ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo]) {
+        case AVAuthorizationStatusAuthorized: {
+            if (completeHandle) {
+                completeHandle(YES);
             }
-        });
-    }];
+        }
+            break;
+        case AVAuthorizationStatusNotDetermined: {
+            /// 该应用尚未请求过权限
+            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (granted) {
+                        if (completeHandle) {
+                            completeHandle(YES);
+                        }
+                    } else {
+                        if (completeHandle) {
+                            completeHandle(NO);
+                        }
+                    }
+                });
+            }];
+        }
+            break;
+        case AVAuthorizationStatusDenied: {
+            if (completeHandle) {
+                completeHandle(NO);
+            }
+        }
+            break;
+        case AVAuthorizationStatusRestricted: {
+            /// 受限
+            if (completeHandle) {
+                completeHandle(NO);
+            }
+        }
+            break;
+    }
 }
 
 - (instancetype)initWithScanView:(UIView *)scanView {
@@ -260,7 +285,7 @@ static NSString *CHInterestViewKey = @"CHInterestViewKey";
 }
 
 + (void)recognizeImage:(UIImage *)image resultBlock:(CHScanConfigScanImageResultBlock)resultBlock {
-    CIDetector*detector = [CIDetector detectorOfType:CIDetectorTypeQRCode context:nil options:@{ CIDetectorAccuracy : CIDetectorAccuracyHigh }];
+    CIDetector *detector = [CIDetector detectorOfType:CIDetectorTypeQRCode context:nil options:@{ CIDetectorAccuracy : CIDetectorAccuracyHigh }];
     NSArray *features = [detector featuresInImage:[CIImage imageWithCGImage:image.CGImage]];
     NSMutableArray *arrayM = [[NSMutableArray alloc] init];
     for (CIQRCodeFeature *feature in features) {

@@ -8,15 +8,15 @@
 ## 使用
 
 ```
- [CHScanConfig canOpenScan:^(BOOL canOpen) {
-        if (canOpen) {
-            self.scanConfig = [[CHScanConfig alloc] initWithScanView:self.view rectOfInterest:self.viewInterest.frame];
-            self.scanConfig.scanResultBlock = ^(CHScanConfig *scanConfig, NSArray<NSString *> *stringValues) {
-                NSLog(@"%@", stringValues);
-            };
-            [self.scanConfig startRunning];
-        }
-    }];
+[CHScanConfig canOpenScan:^(BOOL canOpen) {
+	if (canOpen) {
+		self.scanConfig = [[CHScanConfig alloc] initWithScanView:self.view rectOfInterest:self.viewInterest.frame];
+		self.scanConfig.scanResultBlock = ^(CHScanConfig *scanConfig, NSArray<NSString *> *stringValues) {
+			NSLog(@"%@", stringValues);
+		};
+		[self.scanConfig startRunning];
+	}
+}];
 ```
 **注** 默认支持的是扫描QRCode.
 
@@ -57,5 +57,6 @@
 
 |版本|更新内容|
 |:--|:--|
+|0.0.5|优化权限请求|
 |0.0.4|现支持转屏,重写识别框代码.|
 |0.0.1~0.0.3|支持生成、识别二维码/条形码(扫码或者是图库中的).|

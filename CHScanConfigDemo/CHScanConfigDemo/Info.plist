@@ -19,11 +19,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>🤣🤣🤣</string>
+	<string>不同意此权限无法使用相机识别二维码等功能</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>🤣🤣🤣</string>
+	<string>不同意此权限就无法将图片保存至相册</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>🤣🤣🤣</string>
+	<string>不同意此权限就无法识别本机含二维码的图片</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
